@@ -7,11 +7,11 @@ import {
   UseGuards
 } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiInternalServerErrorResponse, ApiNoContentResponse, ApiNotFoundResponse, ApiOperation } from '@nestjs/swagger';
-import { TokenGuard } from '../auth/guard/token.guard';
-import { ActiveUser } from '../common/decorator/active-user.decorator';
-import { ActiveUserInterface } from '../common/interface/active-user.interface';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserService } from './user.service';
+import { TokenGuard } from '../../auth/guard/token.guard';
+import { ActiveUser } from '../../common/decorator/active-user.decorator';
+import { ActiveUserInterface } from '../../common/interface/active-user.interface';
+import { UpdateUserDto } from '../../user/dto/update-user.dto';
+import { UserService } from '../../user/services/user.service';
 
 @Controller('user')
 export class UserController {

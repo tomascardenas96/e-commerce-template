@@ -8,9 +8,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { User } from '../entities/user.entity';
+import { IUserActionResponse, IUserAuth, IUserBase, IUserProfile } from '../interfaces/user.interface';
 
 @Injectable()
 export class UserService {
@@ -20,7 +21,7 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) { }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<IUserBase> {
     try {
       const exists = await this.isUserAlreadyExists(createUserDto.email);
 
@@ -43,16 +44,16 @@ export class UserService {
 
   }
 
-  private async isUserAlreadyExists(email: string) {
+  private async isUserAlreadyExists(email: string): Promise<boolean> {
     const user = await this.userRepository.findOne({ where: { email } });
     return !!user;
   }
 
-  async getUserByEmail(email: string) {
+  async getUserByEmail(email: string): Promise<IUserAuth> {
     try {
       const user = await this.userRepository.findOne({
         where: { email },
-        select: ['id', 'name', 'lastname', 'email', 'password', 'isEmailConfirmed', 'role', 'failedAttempts', 'lockedUntil'],
+        select: ['id', 'name', 'lastname', 'email', 'password', 'isEmailConfirmed', 'role', 'failedAttempts', 'lockedUntil', 'resetToken'],
         withDeleted: true
       });
 
@@ -67,7 +68,7 @@ export class UserService {
 
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string): Promise<IUserAuth> {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
@@ -108,7 +109,7 @@ export class UserService {
     }
   }
 
-  async updateUserInformation(id: string, updateUserDto: UpdateUserDto): Promise<void> {
+  async updateUserInformation(id: string, updateUserDto: UpdateUserDto): Promise<IUserActionResponse> {
     try {
       const parsedDate = new Date(updateUserDto.birthdate + "T00:00:00");
       const isValidDate = !isNaN(parsedDate.getTime())
@@ -133,6 +134,12 @@ export class UserService {
 
       const updatedFields = Object.keys(updateUserDto).join(', ');
       this.logger.log(`[USER_UPDATE_SUCCESS] - ID: ${id} - Fields updated: ${updatedFields}`);
+
+      return {
+        success: true,
+        message: `User with ID ${id} was successfully updated`,
+        userId: id
+      };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -146,7 +153,7 @@ export class UserService {
     }
   }
 
-  async getUserByIdWithoutPassword(id: string) {
+  async getUserByIdWithoutPassword(id: string): Promise<IUserProfile> {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
@@ -184,7 +191,7 @@ export class UserService {
 
   }
 
-  async softDeleteUser(id: string) {
+  async softDeleteUser(id: string): Promise<IUserActionResponse> {
     try {
       const deleteUser = await this.userRepository.softDelete(id);
 
@@ -193,6 +200,11 @@ export class UserService {
         throw new NotFoundException('User not found')
       }
 
+      return {
+        success: true,
+        message: `User with ID ${id} was successfully deactivated`,
+        userId: id
+      };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -206,7 +218,7 @@ export class UserService {
     }
   }
 
-  async restoreDeletedUser(id: string) {
+  async restoreDeletedUser(id: string): Promise<IUserActionResponse> {
     try {
       const restoredUser = await this.userRepository.restore(id);
 
@@ -216,6 +228,12 @@ export class UserService {
       }
 
       this.logger.log(`[USER_RESTORE_SUCCESS] - User ID: ${id} has been successfully reactivated`);
+
+      return {
+        success: true,
+        message: 'User has been successfully reactivated',
+        userId: id
+      };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -229,7 +247,7 @@ export class UserService {
     }
   }
 
-  async update(id: string, user: User) {
+  async update(id: string, user: User): Promise<IUserBase> {
     try {
       const userToBeUpdated = await this.userRepository.preload({
         id,
@@ -240,7 +258,8 @@ export class UserService {
         throw new NotFoundException('User not found');
       }
 
-      await this.userRepository.save(userToBeUpdated);
+      const updatedUser = await this.userRepository.save(userToBeUpdated);
+      return updatedUser;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -254,7 +273,7 @@ export class UserService {
     }
   }
 
-  async markUserAsConfirmed(user: User) {
+  async markUserAsConfirmed(user: User): Promise<IUserBase> {
     try {
       if (user.isEmailConfirmed) {
         this.logger.warn(`[USER_CONFIRM_ALREADY_DONE] - User: ${user.email}`);

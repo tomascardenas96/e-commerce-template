@@ -13,6 +13,14 @@ import { MailModule } from './mail/mail.module';
 import { MailService } from './mail/mail.service';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
+import { ProductModule } from './product/product.module';
+import { CartModule } from './cart/cart.module';
+import { OrderModule } from './order/order.module';
+import { PaymentModule } from './payment/payment.module';
+import { ShippingModule } from './shipping/shipping.module';
+import { DiscountModule } from './discount/discount.module';
+import { ReviewModule } from './review/review.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -34,7 +42,15 @@ import { UserModule } from './user/user.module';
     UserModule,
     AuthModule,
     MailModule,
-    HealthModule
+    HealthModule,
+    ProductModule,
+    CartModule,
+    OrderModule,
+    PaymentModule,
+    ShippingModule,
+    DiscountModule,
+    ReviewModule,
+    NotificationModule
   ],
 
   providers: [

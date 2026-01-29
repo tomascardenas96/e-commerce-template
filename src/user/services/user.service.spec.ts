@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from './user.service';
+import { UserService } from './services/user.service';
 
 describe('UserService', () => {
   let service: UserService;
@@ -17,6 +17,6 @@ describe('UserService', () => {
   });
 
   it('debería crear una instancia válida del servicio UserService', () => {
-  expect(service).toBeDefined();
-});
+    expect(service).toBeDefined();
+  });
 });

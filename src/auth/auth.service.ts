@@ -9,11 +9,11 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { OAuth2Client } from 'google-auth-library';
+import { IUserAuth, IUserBase, IUserProfile } from 'src/user/interfaces/user.interface';
 import { TooManyRequestsException } from '../common/exceptions/too-many-request.exception';
-import { User } from '../user/entities/user.entity';
 import { MailService } from '../mail/mail.service';
-import { UserService } from '../user/user.service';
+import { User } from '../user/entities/user.entity';
+import { UserService } from '../user/services/user.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
@@ -23,7 +23,6 @@ import { SendConfirmationMailDto } from './dto/send-confirmation-mail';
 
 @Injectable()
 export class AuthService {
-  private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   private readonly logger: Logger = new Logger(AuthService.name);
   private MAX_FAILED_ATTEMPTS = 4;
   private LOCK_TIME_MINUTES = 5;
@@ -51,15 +50,15 @@ export class AuthService {
         password: hashedPassword,
       };
 
-      const createdUser = await this.userService.create(userToCreate);
+      const createdUser = await this.userService.create(userToCreate) as IUserBase;
 
       // Log de éxito en DB
       this.logger.log(`[REGISTER_SUCCESS] - User Created ID: ${createdUser.id} - Email: ${createdUser.email}`);
 
       this.sendConfirmationMail({ email: createdUser.email })
-        .catch(err => {
-          this.logger.error(`[MAIL_ERROR] - Could not send confirmation to ${createdUser.email}`, err.stack);
-        });
+        .catch(err =>
+          this.logger.error(`[MAIL_ERROR] - Could not send confirmation to ${createdUser.email}`, err.stack)
+        );
 
       return {
         message: 'Registration Successful',
@@ -83,7 +82,7 @@ export class AuthService {
 
     try {
       // 1. Buscar usuario
-      const user = await this.userService.getUserByEmail(email);
+      const user: IUserAuth = await this.userService.getUserByEmail(email);
 
       // 2. Si no existe, usamos una respuesta genérica (Seguridad)
       if (!user) {
@@ -102,7 +101,7 @@ export class AuthService {
         } else {
           user.lockedUntil = null;
           user.failedAttempts = 0;
-          await this.userService.update(user.id, user);
+          await this.userService.update(user.id, user as User);
         }
       }
 
@@ -119,7 +118,7 @@ export class AuthService {
           this.logger.warn(`[LOGIN_FAILED] - Invalid password for: ${email} - Attempt: ${user.failedAttempts}`);
         }
 
-        await this.userService.update(user.id, user);
+        await this.userService.update(user.id, user as User);
         throw new UnauthorizedException('Invalid credentials');
       }
 
@@ -128,7 +127,7 @@ export class AuthService {
       if (user.failedAttempts > 0) {
         user.failedAttempts = 0;
         user.lockedUntil = null;
-        await this.userService.update(user.id, user);
+        await this.userService.update(user.id, user as User);
       }
 
       // 6. Generar Token
@@ -159,7 +158,7 @@ export class AuthService {
 
   async getActiveUser(id: string) {
     try {
-      const user = await this.userService.getUserByIdWithoutPassword(id);
+      const user: IUserProfile = await this.userService.getUserByIdWithoutPassword(id);
 
       if (!user) {
         this.logger.warn(`[GET_ACTIVE_USER_NOT_FOUND] - User ID: ${id}`);
@@ -185,7 +184,7 @@ export class AuthService {
     const { oldPassword, newPassword, confirmPassword } = changePasswordDto;
 
     try {
-      const user = await this.userService.getUserById(id);
+      const user: IUserAuth = await this.userService.getUserById(id);
 
       const isValidPassword = await bcrypt.compare(oldPassword, user.password);
       if (!isValidPassword) {
@@ -203,7 +202,7 @@ export class AuthService {
 
       user.password = hashedPassword;
 
-      await this.userService.update(user.id, user);
+      await this.userService.update(user.id, user as User);
 
       return {
         message: 'Password changed successfully',
@@ -223,7 +222,7 @@ export class AuthService {
 
   async forgotPassword(dto: ForgotPasswordDto) {
     try {
-      const user: User = await this.userService.getUserByEmail(dto.email);
+      const user: IUserAuth = await this.userService.getUserByEmail(dto.email);
 
       if (!user) {
         this.logger.warn(`[FORGOT_PASSWORD_ATTEMPT] - Email not found: ${dto.email}`);
@@ -240,7 +239,7 @@ export class AuthService {
       });
 
       user.resetToken = resetToken;
-      await this.userService.update(user.id, user);
+      await this.userService.update(user.id, user as User);
 
       await this.mailService.sendResetPasswordMail(user.email, resetToken);
 
@@ -286,7 +285,7 @@ export class AuthService {
         throw new UnauthorizedException('Token expired or invalid');
       }
 
-      const user = await this.userService.getUserById(payload.sub);
+      const user: IUserAuth = await this.userService.getUserById(payload.sub);
 
       if (!user || user.resetToken !== token) {
         this.logger.warn(`[RESET_PASSWORD_TOKEN_MISMATCH] - User ID: ${payload?.sub} - Token might be reused or replaced`);
@@ -299,7 +298,7 @@ export class AuthService {
       user.password = hashedPassword;
       user.resetToken = null;
 
-      await this.userService.update(user.id, user);
+      await this.userService.update(user.id, user as User);
 
       this.logger.log(`[RESET_PASSWORD_SUCCESS] - Password reset completed for User ID: ${user.id}`);
 
@@ -317,7 +316,7 @@ export class AuthService {
 
   async sendConfirmationMail(dto: SendConfirmationMailDto) {
     try {
-      const user = await this.userService.getUserByEmail(dto.email);
+      const user: IUserAuth = await this.userService.getUserByEmail(dto.email);
 
       if (!user) {
         this.logger.warn(`[CONFIRMATION_MAIL_ATTEMPT] - User not found: ${dto.email}`);
@@ -378,7 +377,7 @@ export class AuthService {
         throw new BadRequestException('Token expired or invalid');
       }
 
-      const user = await this.userService.getUserById(payload.sub);
+      const user: IUserAuth = await this.userService.getUserById(payload.sub);
 
       if (!user) {
         this.logger.warn(`[EMAIL_CONFIRM_USER_NOT_FOUND] - User ID from token: ${payload.sub}`);
@@ -390,7 +389,7 @@ export class AuthService {
         return { message: 'Email was already confirmed' };
       }
 
-      await this.userService.markUserAsConfirmed(user);
+      await this.userService.markUserAsConfirmed(user as User);
 
       this.logger.log(`[EMAIL_CONFIRMED_SUCCESS] - User ID: ${user.id} - Email: ${user.email}`);
 

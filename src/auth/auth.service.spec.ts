@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 //importaciones necesarias para cofiguracion de prueba 
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/services/user.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -13,14 +13,14 @@ describe('AuthService', () => {
     UserServiceMock = {
       create: jest.fn(),
       getUserByEmail: jest.fn(),
-      getUserById: jest.fn(), 
+      getUserById: jest.fn(),
       updateUserInformation: jest.fn(),
       softDeleteUser: jest.fn(),
-      restoreDeletedUser: jest.fn(),  
+      restoreDeletedUser: jest.fn(),
       filterUsersByDniCuitOrCbu: jest.fn(),
     } as unknown as jest.Mocked<UserService>
 
-    const jwtServiceMock={
+    const jwtServiceMock = {
       //definir metodos que necesitas en el mock jwtService
     }
 
@@ -30,9 +30,9 @@ describe('AuthService', () => {
         {
           provide: UserService,
           useValue: UserServiceMock
-        },{
-          provide:JwtService,
-          useValue:jwtServiceMock 
+        }, {
+          provide: JwtService,
+          useValue: jwtServiceMock
         }
       ],
     }).compile();
@@ -40,7 +40,7 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
   });
 
-  it('should be defined', () => { 
-    expect(service).toBeDefined(); 
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 });

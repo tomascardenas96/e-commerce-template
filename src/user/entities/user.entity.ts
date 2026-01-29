@@ -1,17 +1,24 @@
 
-import { AuthProvider } from 'src/auth/enums/auth-provider.enum';
-import { RolesEnum } from 'src/common/enum/roles.enum';
 import {
   Column,
-  CreateDateColumn,
-  DeleteDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn
 } from 'typeorm';
+import { Cart } from '../../cart/entities/cart.entity';
+import { BaseEntity } from '../../common/entities/base.entity';
+import { Notification } from '../../notification/entities/notification.entity';
+import { Order } from '../../order/entities/order.entity';
+import { PaymentMethod } from '../../payment/entities/payment-methods.entity';
+import { Review } from '../../review/entities/review.entity';
+import { Profile } from './profile.entity';
+import { Role } from './role.entity';
+import { UserAddress } from './user-address.entity';
 
-@Entity()
-export class User {
+@Entity('users')
+export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -24,26 +31,14 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
-  password?: string;
+  @Column({ select: false })
+  password: string;
 
   @Column({ nullable: true, unique: true })
   phone?: string;
 
   @Column({ type: 'date', nullable: true })
   birthdate: Date;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @DeleteDateColumn()
-  deletedAt: Date;
-
-  @Column({ default: RolesEnum.MEMBER })
-  role: RolesEnum;
 
   @Column({ default: false })
   isEmailConfirmed: boolean;
@@ -62,4 +57,28 @@ export class User {
 
   @Column({ type: 'timestamptz', nullable: true })
   lockedUntil: Date | null;
+
+  @OneToOne(() => Profile, (profile) => profile.user, { onDelete: 'CASCADE' })
+  profile: Profile;
+
+  @ManyToOne(() => Role, (role) => role.users)
+  role: Role;
+
+  @OneToMany(() => UserAddress, (address) => address.user)
+  addresses: UserAddress[];
+
+  @OneToMany(() => Cart, (cart) => cart.user)
+  carts: Cart[]
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
+
+  @OneToMany(() => PaymentMethod, (paymentMethod) => paymentMethod.user)
+  paymentMethods: PaymentMethod[];
+
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
 }
