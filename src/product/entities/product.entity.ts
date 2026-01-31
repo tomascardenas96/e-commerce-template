@@ -41,7 +41,7 @@ export class Product extends BaseEntity {
     category: Category;
 
     @OneToMany(() => ProductVariant, (variant) => variant.product, { cascade: true })
-    variant: ProductVariant[];
+    variants: ProductVariant[];
 
     @OneToMany(() => Review, (review) => review.product)
     reviews: Review[];

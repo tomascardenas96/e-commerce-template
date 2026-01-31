@@ -7,6 +7,7 @@ import { ProductVariant } from '../../product-variant/entities/product-variant.e
 import { ProductVariantService } from '../../product-variant/services/product-variant.service';
 import { CreateProductDto } from '../dtos/create-product.dto';
 import { Product } from '../entities/product.entity';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @Injectable()
 export class ProductService {
@@ -85,6 +86,34 @@ export class ProductService {
 
         } finally {
             await queryRunner.release();
+        }
+    }
+
+    async findAll(paginationDto: PaginationDto) {
+        const { limit, offset } = paginationDto;
+
+        this.logger.log(`Consultando productos - Limit: ${limit}, Offset: ${offset}`);
+
+        try {
+            const [products, total] = await this.productRepository.findAndCount({
+                take: limit,
+                skip: offset,
+                order: {
+                    createdAt: 'DESC'
+                },
+                relations: {
+                    category: true,
+                    variants: true
+                }
+            });
+
+            return {
+                total,
+                products
+            }
+        } catch (error) {
+            this.logger.error(`Error al recuperar productos: ${error.message}`);
+            throw new InternalServerErrorException('No se pudo obtener la lista de productos');
         }
     }
 }

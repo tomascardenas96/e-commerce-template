@@ -1,7 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BaseEntity } from "../../common/entities/base.entity";
 import { Product } from "../../product/entities/product.entity";
-import { ApiProperty } from "@nestjs/swagger";
 
 @Entity('product_variants')
 export class ProductVariant extends BaseEntity {
@@ -20,6 +19,6 @@ export class ProductVariant extends BaseEntity {
     @Column({ type: 'jsonb', nullable: true })
     attributes: Record<string, any>;
 
-    @ManyToOne(() => Product, (product) => product.variant, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Product, (product) => product.variants, { onDelete: 'CASCADE' })
     product: Product;
 }
