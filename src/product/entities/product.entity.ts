@@ -1,8 +1,9 @@
-import { BaseEntity } from "../../common/entities/base.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Category } from "./category.entity";
-import { ProductVariant } from "./product-variant.entity";
-import { Review } from "src/review/entities/review.entity";
+import { BaseEntity } from "../../common/entities/base.entity";
+import { Review } from "../../review/entities/review.entity";
+import { Category } from "../../category/entities/category.entity";
+import { ProductVariant } from "../../product-variant/entities/product-variant.entity";
+import { ApiProperty } from "@nestjs/swagger";
 
 @Entity('products')
 export class Product extends BaseEntity {
@@ -35,6 +36,7 @@ export class Product extends BaseEntity {
     })
     totalReviews: number; // Contador simple de reseñas
 
+    @ApiProperty({ type: () => Category })
     @ManyToOne(() => Category, (category) => category.products)
     category: Category;
 
