@@ -2,12 +2,12 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGene
 import { Cart } from "../../cart/entities/cart.entity";
 import { BaseEntity } from "../../common/entities/base.entity";
 import { Discount } from "../../discount/entities/discount.entity";
+import { OrderAddress } from "../../order-address/entities/order-address.entity";
+import { OrderItem } from "../../order-item/entities/order-item.entity";
 import { Payment } from "../../payment/entities/payment.entity";
 import { Shipment } from "../../shipping/entities/shipment.entity";
 import { User } from "../../user/entities/user.entity";
 import { OrderStatus } from "../enums/order-status.enum";
-import { OrderAddress } from "./order-address.entity";
-import { OrderItem } from "./order-item.entity";
 
 @Entity('orders')
 export class Order extends BaseEntity {

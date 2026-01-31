@@ -1,7 +1,7 @@
 import { BaseEntity } from "../../common/entities/base.entity";
 import { User } from "../../user/entities/user.entity";
 import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Discount } from "./discount.entity";
+import { Discount } from "../../discount/entities/discount.entity";
 
 @Entity('user_discounts')
 @Index(['user', 'discount'], { unique: true })

@@ -11,11 +11,11 @@ import { Cart } from '../../cart/entities/cart.entity';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { Notification } from '../../notification/entities/notification.entity';
 import { Order } from '../../order/entities/order.entity';
-import { PaymentMethod } from '../../payment/entities/payment-methods.entity';
+import { PaymentMethod } from '../../payment-method/entities/payment-method.entity';
+import { Profile } from '../../profile/entities/profile.entity';
 import { Review } from '../../review/entities/review.entity';
-import { Profile } from './profile.entity';
-import { Role } from './role.entity';
-import { UserAddress } from './user-address.entity';
+import { Role } from '../../role/entities/role.entity';
+import { UserAddress } from '../../user-address/entities/user-address.entity';
 
 @Entity('users')
 export class User extends BaseEntity {

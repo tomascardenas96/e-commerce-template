@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn
 import { BaseEntity } from "../../common/entities/base.entity";
 import { Order } from "../../order/entities/order.entity";
 import { ShipmentStatus } from "../enums/shipment-status.enum";
-import { ShippingMethod } from "./shipping-method.entity";
+import { ShippingMethod } from "../../shipping-method/entities/shipping-method.entity";
 
 @Entity('shipments')
 export class Shipment extends BaseEntity {

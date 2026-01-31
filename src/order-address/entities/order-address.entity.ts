@@ -1,6 +1,6 @@
 import { BaseEntity } from "src/common/entities/base.entity";
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Order } from "./order.entity";
+import { Order } from "../../order/entities/order.entity";
 
 @Entity('order_addresses')
 export class OrderAddress extends BaseEntity {

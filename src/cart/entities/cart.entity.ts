@@ -2,7 +2,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGenerat
 import { BaseEntity } from "../../common/entities/base.entity";
 import { User } from "../../user/entities/user.entity";
 import { CartStatus } from "../enums/cart-status.enum";
-import { CartItem } from "./cart-item.entity";
+import { CartItem } from "../../cart-item/entities/cart-item.entity";
 
 @Entity('carts')
 @Index(['user', 'status'], { unique: true, where: "status = 'open'" })

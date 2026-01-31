@@ -1,5 +1,3 @@
-import { AuthProvider } from "src/auth/enums/auth-provider.enum";
-
 export interface CreateUserDto {
   name: string;
   lastname?: string;
