@@ -158,18 +158,22 @@ export class UserService {
       const user = await this.userRepository.findOne({
         where: { id },
         withDeleted: true,
-        select: [
-          'id',
-          'name',
-          'lastname',
-          'email',
-          'birthdate',
-          'createdAt',
-          'updatedAt',
-          'deletedAt',
-          'role',
-          'isEmailConfirmed',
-        ]
+        select: {
+          id: true,
+          name: true,
+          lastname: true,
+          email: true,
+          birthdate: true,
+          createdAt: true,
+          updatedAt: true,
+          deletedAt: true,
+          role: {
+            id: true,
+            name: true
+          },
+          isEmailConfirmed: true,
+        },
+        relations: ['role']
       });
 
       if (!user) {

@@ -20,6 +20,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SendConfirmationMailDto } from './dto/send-confirmation-mail';
+import { RoleService } from 'src/role/services/role.service';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +31,8 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    private readonly mailService: MailService
+    private readonly mailService: MailService,
+    private readonly roleService: RoleService
   ) { }
 
   async register(registerDto: RegisterDto) {
@@ -44,10 +46,13 @@ export class AuthService {
         throw new BadRequestException('Invalid birthdate format');
       }
 
+      const role = await this.roleService.getRoleByName('member');
+
       const userToCreate = {
         ...registerDto,
         birthdate,
         password: hashedPassword,
+        role: role.id,
       };
 
       const createdUser = await this.userService.create(userToCreate) as IUserBase;

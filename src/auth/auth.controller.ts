@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { ActiveUser } from '../common/decorator/active-user.decorator';
 import { Public } from '../common/decorator/public-decorator';
@@ -11,6 +11,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SendConfirmationMailDto } from './dto/send-confirmation-mail';
+import { ActiveUserResponseDto } from './dto/active-user-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -45,6 +46,7 @@ export class AuthController {
 
   @Get()
   @ApiOperation({ summary: 'Obtener usuario activo (obtenido desde el token)' })
+  @ApiOkResponse({ description: 'User found', type: ActiveUserResponseDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized request' })
   @ApiBearerAuth('access-token')
   getActiveUser(@ActiveUser() { id }: ActiveUserInterface) {
