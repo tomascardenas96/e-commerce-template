@@ -45,6 +45,15 @@ export class AuthController {
     return this.authService.login(loginDto, response);
   }
 
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout de un usuario' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized request' })
+  @ApiOkResponse({ description: 'User logged out successfully' })
+  @ApiBearerAuth('access-token')
+  logout(@Res({ passthrough: true }) response: Response) {
+    return this.authService.logout(response);
+  }
+
   @Get('me')
   @ApiOperation({ summary: 'Obtener usuario activo (obtenido desde el token)' })
   @ApiOkResponse({ description: 'User found', type: ActiveUserResponseDto })

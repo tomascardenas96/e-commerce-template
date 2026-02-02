@@ -187,6 +187,24 @@ export class AuthService {
     }
   }
 
+  async logout(response: Response) {
+    try {
+      response.cookie('access_token', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        expires: new Date(0), // Fecha en el pasado para borrarla
+      })
+
+      this.logger.log('[LOGOUT_SUCCESS] - User logged out successfully');
+
+      return { message: 'User logged out successfully' };
+    } catch (error) {
+      this.logger.error(`Error durante el Logout: ${error.message}`);
+      throw error;
+    }
+  }
+
   async getActiveUser(id: string) {
     try {
       const user: IUserProfile = await this.userService.getUserByIdWithoutPassword(id);
