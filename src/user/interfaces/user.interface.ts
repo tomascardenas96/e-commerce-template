@@ -11,6 +11,10 @@ export interface IUserBase {
 // Contrato para procesos de autenticación (Interno)
 export interface IUserAuth extends IUserBase {
     password?: string;
+    birthdate: Date;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt?: Date;
     failedAttempts: number;
     lockedUntil?: Date;
     resetToken?: string;
