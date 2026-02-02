@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { ActiveUser } from '../common/decorator/active-user.decorator';
@@ -12,6 +12,7 @@ import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SendConfirmationMailDto } from './dto/send-confirmation-mail';
 import { ActiveUserResponseDto } from './dto/active-user-response.dto';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -40,11 +41,11 @@ export class AuthController {
     description: 'Error user login or getting unique user profile name',
   })
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response) {
+    return this.authService.login(loginDto, response);
   }
 
-  @Get()
+  @Get('me')
   @ApiOperation({ summary: 'Obtener usuario activo (obtenido desde el token)' })
   @ApiOkResponse({ description: 'User found', type: ActiveUserResponseDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized request' })

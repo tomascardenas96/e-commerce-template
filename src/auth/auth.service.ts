@@ -21,6 +21,7 @@ import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SendConfirmationMailDto } from './dto/send-confirmation-mail';
 import { RoleService } from 'src/role/services/role.service';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -82,7 +83,7 @@ export class AuthService {
 
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, response: Response) {
     const { email, password } = loginDto;
 
     try {
@@ -135,8 +136,8 @@ export class AuthService {
         await this.userService.update(user.id, user as User);
       }
 
-      // 6. Generar Token
-      const payload = { sub: user.id, role: user.role };
+      // 6. Generar Token y enviarlo en cookie
+      const payload = { sub: user.id, role: user.role.name };
 
       const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -150,9 +151,34 @@ export class AuthService {
         expiresIn: '14d'
       });
 
-      this.logger.log(`[LOGIN_SUCCESS] - User ID: ${user.id} - Role: ${user.role}`);
+      response.cookie('access_token', token, {
+        httpOnly: true,               // Impide acceso desde JavaScript (Anti-XSS)
+        secure: process.env.NODE_ENV === 'production', // Solo viaja por HTTPS en producción
+        sameSite: 'lax',              // Protege contra CSRF
+        maxAge: 14 * 24 * 60 * 60 * 1000 // 14 días en milisegundos
+      })
 
-      return { access_token: token };
+      this.logger.log(`[LOGIN_SUCCESS] - User ID: ${user.id} - Role: ${user.role.name}`);
+
+      return {
+        user: {
+          id: user.id,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+          deletedAt: user.deletedAt,
+          name: user.name,
+          lastname: user.lastname,
+          email: user.email,
+          birthdate: user.birthdate,
+          isEmailConfirmed: user.isEmailConfirmed,
+          role: {
+            id: user.role.id,
+            name: user.role.name,
+          },
+
+        },
+        message: 'Login successful'
+      };
     } catch (error) {
       if (error instanceof HttpException) throw error;
 
