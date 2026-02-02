@@ -9,13 +9,13 @@ import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { GetProductsResponseDto } from '../dtos/get-products-response.dto';
 
 @ApiTags('Products')
-// @UseGuards(RoleGuard)
+@UseGuards(RoleGuard)
 @Controller('products')
 export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
   @Post()
-  // @Roles('admin')
+  @Roles('admin')
   @ApiOperation({ summary: 'Crear un nuevo producto' })
   @ApiCreatedResponse({ description: 'Producto creado exitosamente' })
   @ApiBadRequestResponse({ description: 'Error en los datos de entrada' })
