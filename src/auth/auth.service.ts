@@ -165,7 +165,10 @@ export class AuthService {
         throw new NotFoundException('User not found')
       };
 
-      return user
+      return {
+        user,
+        message: "User successfully retrieved"
+      }
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
